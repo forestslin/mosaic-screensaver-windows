@@ -27,6 +27,16 @@
 4. 到 `bin\Release\net6.0-windows\win-x64\publish\` 目录中找到生成的 `.exe`。
 5. 将其后缀名重命名为 `.scr` 即可作为屏保使用。
 
+## 🆕 更新日志 (Changelog)
+
+### v2.0
+- **全新设置面板**：在 Windows 屏幕保护程序设置中点击“设置”，现在可以自由勾选多达 28 种音乐类型！
+- **修复黑边问题**：完美适配任何屏幕比例和多显示器，彻底消除所有黑边和封面裁切不完整问题。
+- **自动发布更新**：集成了 GitHub Actions，自动构建并发布最新的单文件版屏保。
+
+### v1.0
+- 初始版本发布，支持 macOS 风格 3D 马赛克翻转动画。
+
 ## 🛠️ 技术栈
 - **前端**：Vanilla HTML5 + CSS3 (Grid & 3D Transforms) + JavaScript
 - **外壳**：C# (.NET 6 Windows Forms) + Microsoft.Web.WebView2
