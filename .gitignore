@@ -1,0 +1,17 @@
+# .NET Core
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.log
+
+# Windows image cache
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Executables
+*.exe
+*.dll
+*.scr
