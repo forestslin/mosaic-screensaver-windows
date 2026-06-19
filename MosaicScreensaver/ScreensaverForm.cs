@@ -80,6 +80,11 @@ namespace MosaicScreensaver
                 var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
                 await webView.EnsureCoreWebView2Async(env);
                 
+                // Inject selected genres from Registry
+                var genres = SettingsManager.LoadGenres();
+                string genresJson = "['" + string.Join("','", genres) + "']";
+                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($"window.selectedGenres = {genresJson};");
+                
                 string appDir = AppDomain.CurrentDomain.BaseDirectory;
                 string htmlPath = Path.Combine(appDir, "web", "index.html");
                 if (File.Exists(htmlPath))

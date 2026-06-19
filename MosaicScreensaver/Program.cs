@@ -27,7 +27,7 @@ static class Program
             if (firstArgument == "/c")
             {
                 // Configuration mode
-                MessageBox.Show("此屏保程序无需额外配置。将会从网络获取最高清的专辑封面。\nThis screensaver requires no configuration. It will fetch high-res album arts from the network.", "Mosaic Screensaver", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Application.Run(new SettingsForm());
             }
             else if (firstArgument == "/p")
             {
@@ -56,7 +56,7 @@ static class Program
         else
         {
             // No arguments - treat like /c
-            MessageBox.Show("此屏保程序无需额外配置。将会从网络获取最高清的专辑封面。\nThis screensaver requires no configuration. It will fetch high-res album arts from the network.", "Mosaic Screensaver", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Application.Run(new SettingsForm());
             
             // For testing purposes, you can uncomment this to run full screen on double click:
             // ShowScreensaver();

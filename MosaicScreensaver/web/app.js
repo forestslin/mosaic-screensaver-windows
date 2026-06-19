@@ -1,8 +1,8 @@
-const API_URLS = [
-    'https://itunes.apple.com/search?term=pop&entity=album&limit=200',
-    'https://itunes.apple.com/search?term=rock&entity=album&limit=200',
-    'https://itunes.apple.com/search?term=jazz&entity=album&limit=200'
-];
+const genres = window.selectedGenres && window.selectedGenres.length > 0 
+    ? window.selectedGenres 
+    : ['pop', 'rock', 'jazz'];
+
+const API_URLS = genres.map(g => `https://itunes.apple.com/search?term=${encodeURIComponent(g)}&entity=album&limit=200`);
 
 let artworks = [];
 let tiles = [];
