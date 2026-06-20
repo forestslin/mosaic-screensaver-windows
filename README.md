@@ -1,5 +1,12 @@
 # Album Art Mosaic Screensaver for Windows
 
+![Demo Video](https://github.com/forestslin/mosaic-screensaver-windows/raw/main/demo.mp4)
+
+**English Introduction**
+A stunning Windows screensaver inspired by macOS's classic "Artwork" (Album Art Mosaic) screensaver. It fetches hundreds of high-res album covers from iTunes and displays them in a dynamic, 3D flipping mosaic grid. Features include multi-monitor support, zero dependencies (standalone executable), and a built-in settings UI to select from 28+ music genres (Pop, Rock, K-Pop, Jazz, etc.). No local music library required!
+
+---
+
 这是一个惊艳的 Windows 屏幕保护程序，灵感来源于 macOS 经典的 "Artwork" (专辑封面马赛克) 屏保。它能将数百张高清音乐专辑封面以马赛克网格的形式铺满你的屏幕，并随机进行 3D 翻转动画展示。
 
 ## 🌟 核心特性
