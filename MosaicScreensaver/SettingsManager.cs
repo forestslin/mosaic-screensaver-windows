@@ -7,7 +7,9 @@ namespace MosaicScreensaver
     {
         private const string RegistryKeyPath = @"Software\MosaicScreensaver";
         private const string GenresValueName = "SelectedGenres";
+        private const string MovieGenresValueName = "SelectedMovieGenres";
         private const string FlipSpeedValueName = "FlipSpeed";
+        private const string DisplayModeValueName = "DisplayMode";
 
         // A comprehensive list of music genres
         public static readonly string[] AllGenres = new string[]
@@ -22,6 +24,21 @@ namespace MosaicScreensaver
         public static readonly string[] DefaultGenres = new string[]
         {
             "Pop", "Rock", "Jazz", "Hip-Hop", "Classical", "Electronic"
+        };
+
+        // A comprehensive list of movie genres
+        public static readonly string[] AllMovieGenres = new string[]
+        {
+            "Action", "Adventure", "Animation", "Biography", "Chinese", "Comedy", "Crime",
+            "Documentary", "Drama", "Family", "Fantasy", "History", "Horror",
+            "Music", "Musical", "Mystery", "Romance", "Sci-Fi", "Sport",
+            "Superhero", "Thriller", "War", "Western"
+        };
+
+        // Default to a diverse mix of movie genres
+        public static readonly string[] DefaultMovieGenres = new string[]
+        {
+            "Action", "Comedy", "Sci-Fi", "Chinese", "Adventure"
         };
 
         public static List<string> LoadGenres()
@@ -57,6 +74,92 @@ namespace MosaicScreensaver
                     if (key != null)
                     {
                         key.SetValue(GenresValueName, string.Join(",", genres));
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore registry errors
+            }
+        }
+
+        public static List<string> LoadMovieGenres()
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath))
+                {
+                    if (key != null)
+                    {
+                        string value = key.GetValue(MovieGenresValueName) as string;
+                        if (!string.IsNullOrEmpty(value))
+                        {
+                            return new List<string>(value.Split(','));
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore registry errors and fallback
+            }
+
+            return new List<string>(DefaultMovieGenres);
+        }
+
+        public static void SaveMovieGenres(List<string> genres)
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.CreateSubKey(RegistryKeyPath))
+                {
+                    if (key != null)
+                    {
+                        key.SetValue(MovieGenresValueName, string.Join(",", genres));
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore registry errors
+            }
+        }
+
+        public static int LoadDisplayMode()
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath))
+                {
+                    if (key != null)
+                    {
+                        object value = key.GetValue(DisplayModeValueName);
+                        if (value != null && int.TryParse(value.ToString(), out int mode))
+                        {
+                            if (mode >= 0 && mode <= 2)
+                            {
+                                return mode;
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore registry errors
+            }
+            return 2; // Default to Mixed mode (2)
+        }
+
+        public static void SaveDisplayMode(int mode)
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.CreateSubKey(RegistryKeyPath))
+                {
+                    if (key != null)
+                    {
+                        key.SetValue(DisplayModeValueName, mode);
                     }
                 }
             }

@@ -27,18 +27,11 @@ jobs:
         dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:IncludeAllContentForSelfExtract=true
         Rename-Item -Path "bin\Release\net6.0-windows\win-x64\publish\MosaicScreensaver.exe" -NewName "MosaicScreensaver_Standalone.scr"
 
-    - name: Publish Movie Poster Screensaver
-      run: |
-        cd MoviePosterScreensaver
-        dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:IncludeAllContentForSelfExtract=true
-        Rename-Item -Path "bin\Release\net6.0-windows\win-x64\publish\MoviePosterScreensaver.exe" -NewName "MoviePosterScreensaver_Standalone.scr"
-
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
           MosaicScreensaver/bin/Release/net6.0-windows/win-x64/publish/MosaicScreensaver_Standalone.scr
-          MoviePosterScreensaver/bin/Release/net6.0-windows/win-x64/publish/MoviePosterScreensaver_Standalone.scr
         name: Release ${{ github.ref_name }}
         draft: false
         prerelease: false

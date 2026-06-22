@@ -14,10 +14,25 @@ body, html {
 }
 
 #mosaic-container {
-    display: grid;
+    display: flex;
+    flex-direction: row;
     width: 100vw;
     height: 100vh;
-    gap: 0;
+    overflow: hidden;
+}
+
+.mosaic-column {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.mosaic-column.music {
+    flex: 3;
+}
+
+.mosaic-column.movie {
+    flex: 2;
 }
 
 .tile {

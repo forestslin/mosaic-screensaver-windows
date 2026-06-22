@@ -80,10 +80,19 @@ namespace MosaicScreensaver
                 var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
                 await webView.EnsureCoreWebView2Async(env);
                 
-                // Inject selected genres from Registry
+                // Inject display mode from Registry
+                int mode = SettingsManager.LoadDisplayMode();
+                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($"window.displayMode = {mode};");
+
+                // Inject selected music genres from Registry
                 var genres = SettingsManager.LoadGenres();
                 string genresJson = "['" + string.Join("','", genres) + "']";
-                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($"window.selectedGenres = {genresJson};");
+                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($"window.selectedMusicGenres = {genresJson};");
+
+                // Inject selected movie genres from Registry
+                var movieGenres = SettingsManager.LoadMovieGenres();
+                string movieGenresJson = "['" + string.Join("','", movieGenres) + "']";
+                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($"window.selectedMovieGenres = {movieGenresJson};");
 
                 // Inject flip speed from Registry
                 int speed = SettingsManager.LoadFlipSpeed();
