@@ -35,8 +35,9 @@ namespace MosaicScreensaver
         private void InitializeComponent()
         {
             this.Text = "Mosaic Screensaver Settings";
-            this.Size = new Size(640, 640);
+            this.ClientSize = new Size(640, 640);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
+
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
