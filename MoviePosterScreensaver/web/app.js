@@ -154,10 +154,37 @@ function startFlipping() {
     // Number of simultaneous flips depends on screen size
     const flipCount = Math.max(1, Math.floor((cols * rows) / 20));
     
+    // Map flipSpeed (1-5, default 3) to intervals
+    const speedLevel = window.flipSpeed || 3;
+    let baseInterval, randomRange;
+    switch (speedLevel) {
+        case 1: // Slowest
+            baseInterval = 4500;
+            randomRange = 3000;
+            break;
+        case 2: // Slower
+            baseInterval = 3000;
+            randomRange = 2000;
+            break;
+        case 4: // Faster
+            baseInterval = 750;
+            randomRange = 500;
+            break;
+        case 5: // Fastest
+            baseInterval = 300;
+            randomRange = 200;
+            break;
+        case 3: // Normal
+        default:
+            baseInterval = 1500;
+            randomRange = 1000;
+            break;
+    }
+    
     for (let i = 0; i < flipCount; i++) {
         setTimeout(() => {
-            setInterval(flipRandomTile, 1500 + Math.random() * 1000); // Random interval between 1.5s and 2.5s
-        }, Math.random() * 2000); // Random start offset
+            setInterval(flipRandomTile, baseInterval + Math.random() * randomRange);
+        }, Math.random() * baseInterval);
     }
 }
 

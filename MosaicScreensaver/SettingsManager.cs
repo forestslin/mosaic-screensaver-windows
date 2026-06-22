@@ -7,6 +7,7 @@ namespace MosaicScreensaver
     {
         private const string RegistryKeyPath = @"Software\MosaicScreensaver";
         private const string GenresValueName = "SelectedGenres";
+        private const string FlipSpeedValueName = "FlipSpeed";
 
         // A comprehensive list of music genres
         public static readonly string[] AllGenres = new string[]
@@ -56,6 +57,50 @@ namespace MosaicScreensaver
                     if (key != null)
                     {
                         key.SetValue(GenresValueName, string.Join(",", genres));
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore registry errors
+            }
+        }
+
+        public static int LoadFlipSpeed()
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath))
+                {
+                    if (key != null)
+                    {
+                        object value = key.GetValue(FlipSpeedValueName);
+                        if (value != null && int.TryParse(value.ToString(), out int speed))
+                        {
+                            if (speed >= 1 && speed <= 5)
+                            {
+                                return speed;
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore registry errors
+            }
+            return 3; // Default speed
+        }
+
+        public static void SaveFlipSpeed(int speed)
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.CreateSubKey(RegistryKeyPath))
+                {
+                    if (key != null)
+                    {
+                        key.SetValue(FlipSpeedValueName, speed);
                     }
                 }
             }

@@ -84,6 +84,10 @@ namespace MoviePosterScreensaver
                 var genres = SettingsManager.LoadGenres();
                 string genresJson = "['" + string.Join("','", genres) + "']";
                 await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($"window.selectedGenres = {genresJson};");
+
+                // Inject flip speed from Registry
+                int speed = SettingsManager.LoadFlipSpeed();
+                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($"window.flipSpeed = {speed};");
                 
                 string appDir = AppDomain.CurrentDomain.BaseDirectory;
                 string htmlPath = Path.Combine(appDir, "web", "index.html");

@@ -7,6 +7,7 @@ namespace MoviePosterScreensaver
     {
         private const string RegistryKeyPath = @"Software\MoviePosterScreensaver";
         private const string GenresValueName = "SelectedGenres";
+        private const string FlipSpeedValueName = "FlipSpeed";
 
         // A comprehensive list of movie genres
         public static readonly List<string> AllGenres = new List<string>
@@ -56,6 +57,50 @@ namespace MoviePosterScreensaver
                     if (key != null)
                     {
                         key.SetValue(GenresValueName, string.Join(",", genres));
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore registry errors
+            }
+        }
+
+        public static int LoadFlipSpeed()
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath))
+                {
+                    if (key != null)
+                    {
+                        object value = key.GetValue(FlipSpeedValueName);
+                        if (value != null && int.TryParse(value.ToString(), out int speed))
+                        {
+                            if (speed >= 1 && speed <= 5)
+                            {
+                                return speed;
+                            }
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore registry errors
+            }
+            return 3; // Default speed
+        }
+
+        public static void SaveFlipSpeed(int speed)
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.CreateSubKey(RegistryKeyPath))
+                {
+                    if (key != null)
+                    {
+                        key.SetValue(FlipSpeedValueName, speed);
                     }
                 }
             }
