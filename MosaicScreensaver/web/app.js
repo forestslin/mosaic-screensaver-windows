@@ -15,9 +15,25 @@ let cols = 0;
 let rows = 0;
 
 async function fetchArtworks() {
+    const now = Date.now();
+    const cacheTime = localStorage.getItem('artworksCacheTime');
+    
+    // Use cache if it's less than 24 hours old
+    if (cacheTime && (now - parseInt(cacheTime)) < 24 * 60 * 60 * 1000) {
+        try {
+            const cachedMusic = JSON.parse(localStorage.getItem('cachedMusicArtworks'));
+            const cachedMovie = JSON.parse(localStorage.getItem('cachedMovieArtworks'));
+            if (cachedMusic && cachedMusic.length > 0 && cachedMovie && cachedMovie.length > 0) {
+                musicArtworks = cachedMusic;
+                movieArtworks = cachedMovie;
+                console.log("Loaded artworks from cache.");
+                return;
+            }
+        } catch(e) {}
+    }
+
     // Fetch music sequentially to avoid iTunes rate limits (429 Too Many Requests)
     if (displayMode === 0 || displayMode === 2) {
-        // Shuffle musicGenres and pick up to 3 to prevent API spam
         const selectedMusic = [...musicGenres].sort(() => 0.5 - Math.random()).slice(0, 3);
         for (const g of selectedMusic) {
             const url = `https://itunes.apple.com/search?term=${encodeURIComponent(g)}&entity=album&limit=200`;
@@ -37,12 +53,17 @@ async function fetchArtworks() {
             }
         }
         musicArtworks = musicArtworks.sort(() => Math.random() - 0.5);
-        console.log(`Fetched ${musicArtworks.length} music artworks`);
     }
 
-    // Fetch movie from paginated endpoint to yield a massive pool
+    // Fetch movie from a few random popular pages to get variety without rate limiting
     if (displayMode === 1 || displayMode === 2) {
-        const pages = [0, 1, 2, 3, 4, 5, 6, 7]; // 8 pages * 250 = 2000 shows
+        // Pick 3 random pages from the first 20 pages (approx 5000 popular shows)
+        const pages = [];
+        while(pages.length < 3) {
+            const p = Math.floor(Math.random() * 20);
+            if(!pages.includes(p)) pages.push(p);
+        }
+        
         const promises = pages.map(page => 
             fetch(`https://api.tvmaze.com/shows?page=${page}`)
                 .then(res => res.json())
@@ -71,8 +92,22 @@ async function fetchArtworks() {
             }
         });
         movieArtworks = movieArtworks.sort(() => Math.random() - 0.5);
-        console.log(`Fetched ${movieArtworks.length} movie posters`);
     }
+
+    // Fallback if empty
+    if (musicArtworks.length === 0) {
+        musicArtworks = ['https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/4a/0c/3e/4a0c3e60-fef0-be2a-5a50-6a1005a76e73/196626943960.jpg/600x600bb.jpg'];
+    }
+    if (movieArtworks.length === 0) {
+        movieArtworks = ['https://static.tvmaze.com/uploads/images/original_untouched/425/1064746.jpg'];
+    }
+
+    // Save to cache
+    try {
+        localStorage.setItem('cachedMusicArtworks', JSON.stringify(musicArtworks));
+        localStorage.setItem('cachedMovieArtworks', JSON.stringify(movieArtworks));
+        localStorage.setItem('artworksCacheTime', now.toString());
+    } catch(e) {}
 }
 
 function getRandomArtwork(type) {
