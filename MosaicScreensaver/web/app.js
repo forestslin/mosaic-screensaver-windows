@@ -8,9 +8,6 @@ const movieGenres = window.selectedMovieGenres && window.selectedMovieGenres.len
     ? window.selectedMovieGenres 
     : ['action', 'comedy', 'drama'];
 
-const MUSIC_API_URLS = musicGenres.map(g => `https://itunes.apple.com/search?term=${encodeURIComponent(g)}&entity=album&limit=200`);
-const MOVIE_API_URLS = movieGenres.map(g => `https://api.tvmaze.com/search/shows?q=${encodeURIComponent(g)}`);
-
 let musicArtworks = [];
 let movieArtworks = [];
 let tiles = [];
@@ -18,56 +15,64 @@ let cols = 0;
 let rows = 0;
 
 async function fetchArtworks() {
-    const promises = [];
-    
-    // Fetch music if displayMode is Music (0) or Mixed (2)
+    // Fetch music sequentially to avoid iTunes rate limits (429 Too Many Requests)
     if (displayMode === 0 || displayMode === 2) {
-        promises.push(
-            Promise.all(MUSIC_API_URLS.map(url => fetch(url).then(res => res.json())))
-                .then(results => {
-                    results.forEach(data => {
-                        if (data.results) {
-                            data.results.forEach(item => {
-                                if (item.artworkUrl100) {
-                                    const highResUrl = item.artworkUrl100.replace('100x100bb', '600x600bb');
-                                    musicArtworks.push(highResUrl);
-                                }
-                            });
+        // Shuffle musicGenres and pick up to 3 to prevent API spam
+        const selectedMusic = [...musicGenres].sort(() => 0.5 - Math.random()).slice(0, 3);
+        for (const g of selectedMusic) {
+            const url = `https://itunes.apple.com/search?term=${encodeURIComponent(g)}&entity=album&limit=200`;
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                if (data.results) {
+                    data.results.forEach(item => {
+                        if (item.artworkUrl100) {
+                            const highResUrl = item.artworkUrl100.replace('100x100bb', '600x600bb');
+                            musicArtworks.push(highResUrl);
                         }
                     });
-                    // Shuffle
-                    musicArtworks = musicArtworks.sort(() => Math.random() - 0.5);
-                    console.log(`Fetched ${musicArtworks.length} music artworks`);
-                })
-                .catch(err => console.error("Error fetching music:", err))
-        );
+                }
+            } catch(e) {
+                console.error("Error fetching music:", e);
+            }
+        }
+        musicArtworks = musicArtworks.sort(() => Math.random() - 0.5);
+        console.log(`Fetched ${musicArtworks.length} music artworks`);
     }
-    
-    // Fetch movie if displayMode is Movie (1) or Mixed (2)
+
+    // Fetch movie from paginated endpoint to yield a massive pool
     if (displayMode === 1 || displayMode === 2) {
-        promises.push(
-            Promise.all(MOVIE_API_URLS.map(url => fetch(url).then(res => res.json())))
-                .then(results => {
-                    results.forEach(data => {
-                        if (data) {
-                            data.forEach(item => {
-                                if (item.show && item.show.image && item.show.image.original) {
-                                    movieArtworks.push(item.show.image.original);
-                                } else if (item.show && item.show.image && item.show.image.medium) {
-                                    movieArtworks.push(item.show.image.medium);
-                                }
-                            });
-                        }
-                    });
-                    // Shuffle
-                    movieArtworks = movieArtworks.sort(() => Math.random() - 0.5);
-                    console.log(`Fetched ${movieArtworks.length} movie posters`);
-                })
-                .catch(err => console.error("Error fetching movies:", err))
+        const pages = [0, 1, 2, 3, 4, 5, 6, 7]; // 8 pages * 250 = 2000 shows
+        const promises = pages.map(page => 
+            fetch(`https://api.tvmaze.com/shows?page=${page}`)
+                .then(res => res.json())
+                .catch(() => [])
         );
+        const results = await Promise.all(promises);
+        results.forEach(data => {
+            if (data && Array.isArray(data)) {
+                data.forEach(show => {
+                    const matchesGenre = movieGenres.some(g => {
+                        if (g.toLowerCase() === 'chinese') {
+                            return (show.network && show.network.country && show.network.country.code === 'CN') ||
+                                   (show.webChannel && show.webChannel.country && show.webChannel.country.code === 'CN') ||
+                                   (show.language && show.language.toLowerCase() === 'chinese');
+                        }
+                        return show.genres && show.genres.some(sg => sg.toLowerCase() === g.toLowerCase());
+                    });
+                    if (matchesGenre && show.image) {
+                        if (show.image.original) {
+                            movieArtworks.push(show.image.original);
+                        } else if (show.image.medium) {
+                            movieArtworks.push(show.image.medium);
+                        }
+                    }
+                });
+            }
+        });
+        movieArtworks = movieArtworks.sort(() => Math.random() - 0.5);
+        console.log(`Fetched ${movieArtworks.length} movie posters`);
     }
-    
-    await Promise.all(promises);
 }
 
 function getRandomArtwork(type) {
