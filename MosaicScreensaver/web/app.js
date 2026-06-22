@@ -37,7 +37,23 @@ async function fetchArtworks() {
 
 function getRandomArtwork() {
     if (artworks.length === 0) return '';
-    return artworks[Math.floor(Math.random() * artworks.length)];
+
+    // Collect all currently used artworks on the grid
+    const usedArtworks = new Set();
+    tiles.forEach(t => {
+        if (t.imgFront && t.imgFront.src) usedArtworks.add(t.imgFront.src);
+        if (t.imgBack && t.imgBack.src) usedArtworks.add(t.imgBack.src);
+    });
+
+    // Filter out used ones to prevent duplicates on screen
+    let available = artworks.filter(url => !usedArtworks.has(url));
+    
+    // If we run out of unique artworks, fallback to all
+    if (available.length === 0) {
+        available = artworks;
+    }
+
+    return available[Math.floor(Math.random() * available.length)];
 }
 
 function initGrid() {
