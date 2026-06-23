@@ -1,4 +1,4 @@
-$urls = Get-Content "douban_urls.json" | ConvertFrom-Json
+$urls = Get-Content "douban_urls_1000.json" | ConvertFrom-Json
 $outDir = "MosaicScreensaver\web\covers"
 
 if (!(Test-Path $outDir)) {

@@ -8,6 +8,7 @@ const movieGenres = window.selectedMovieGenres && window.selectedMovieGenres.len
 let musicArtworks = [];
 let movieArtworks = [];
 let bookArtworks = [];
+const activeArtworks = new Set();
 let tiles = [];
 let cols = 0;
 let rows = 0;
@@ -120,8 +121,8 @@ async function fetchBookArtworks() {
         
         if (bookLanguage === 0) {
             // To ensure 100% high-quality Chinese book covers without API limitations or spam, 
-            // we use 250 curated Douban covers hosted on jsDelivr CDN.
-            for (let i = 0; i < 250; i++) {
+            // we use 971 curated Douban covers hosted locally.
+            for (let i = 0; i < 971; i++) {
                 bookArtworks.push(`covers/${i}.jpg`);
             }
         } else {
@@ -165,7 +166,7 @@ async function fetchBookArtworks() {
     }
 }
 
-function getRandomArtwork(type) {
+function getRandomArtwork(type, previousUrl) {
     let pool = [];
     if (type === 'music') pool = musicArtworks;
     else if (type === 'movie') pool = movieArtworks;
@@ -173,7 +174,22 @@ function getRandomArtwork(type) {
     else pool = [...musicArtworks, ...movieArtworks, ...bookArtworks];
 
     if (pool.length === 0) return '';
-    return pool[Math.floor(Math.random() * pool.length)];
+    
+    let attempts = 0;
+    let candidate = '';
+    while (attempts < 50) {
+        candidate = pool[Math.floor(Math.random() * pool.length)];
+        if (!activeArtworks.has(candidate)) {
+            break;
+        }
+        attempts++;
+    }
+
+    if (previousUrl) {
+        activeArtworks.delete(previousUrl);
+    }
+    activeArtworks.add(candidate);
+    return candidate;
 }
 
 function getGridTypes() {
@@ -223,14 +239,18 @@ function initFlipGrid() {
             const front = document.createElement('div');
             front.className = 'face front';
             const imgFront = document.createElement('img');
-            imgFront.src = getRandomArtwork(type);
+            const frontSrc = getRandomArtwork(type);
+            imgFront.src = frontSrc;
+            imgFront.setAttribute('data-original-src', frontSrc);
             imgFront.onload = () => imgFront.classList.add('loaded');
             front.appendChild(imgFront);
             
             const back = document.createElement('div');
             back.className = 'face back';
             const imgBack = document.createElement('img');
-            imgBack.src = getRandomArtwork(type);
+            const backSrc = getRandomArtwork(type);
+            imgBack.src = backSrc;
+            imgBack.setAttribute('data-original-src', backSrc);
             imgBack.onload = () => imgBack.classList.add('loaded');
             back.appendChild(imgBack);
             
@@ -295,7 +315,9 @@ function spawnFlowTile(rowEl, type, itemWidth, screenWidth, duration, startX) {
     tile.style.top = '0';
     
     const img = document.createElement('img');
-    img.src = getRandomArtwork(type);
+    const src = getRandomArtwork(type);
+    img.src = src;
+    img.setAttribute('data-original-src', src);
     img.style.width = '100%';
     img.style.height = '100%';
     img.style.objectFit = 'cover';
@@ -319,6 +341,7 @@ function spawnFlowTile(rowEl, type, itemWidth, screenWidth, duration, startX) {
     });
     
     anim.onfinish = () => {
+        activeArtworks.delete(img.getAttribute('data-original-src'));
         tile.remove();
     };
 }
@@ -336,14 +359,20 @@ function flipRandomTile() {
         tile.el.classList.add('is-flipped');
         setTimeout(() => {
             tile.imgFront.classList.remove('loaded');
-            tile.imgFront.src = getRandomArtwork(tile.type);
-        }, 600);
+            const prevSrc = tile.imgFront.getAttribute('data-original-src');
+            const newSrc = getRandomArtwork(tile.type, prevSrc);
+            tile.imgFront.src = newSrc;
+            tile.imgFront.setAttribute('data-original-src', newSrc);
+        }, 300);
     } else {
         tile.el.classList.remove('is-flipped');
         setTimeout(() => {
             tile.imgBack.classList.remove('loaded');
-            tile.imgBack.src = getRandomArtwork(tile.type);
-        }, 600);
+            const prevSrc = tile.imgBack.getAttribute('data-original-src');
+            const newSrc = getRandomArtwork(tile.type, prevSrc);
+            tile.imgBack.src = newSrc;
+            tile.imgBack.setAttribute('data-original-src', newSrc);
+        }, 300);
     }
     
     setTimeout(() => {
