@@ -122,7 +122,7 @@ async function fetchBookArtworks() {
             // To ensure 100% high-quality Chinese book covers without API limitations or spam, 
             // we use 250 curated Douban covers hosted on jsDelivr CDN.
             for (let i = 0; i < 250; i++) {
-                bookArtworks.push(`https://cdn.jsdelivr.net/gh/forestslin/mosaic-screensaver-windows@main/covers/${i}.jpg`);
+                bookArtworks.push(`covers/${i}.jpg`);
             }
         } else {
             // Mixed/Western books using OpenLibrary
