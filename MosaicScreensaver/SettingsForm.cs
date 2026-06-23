@@ -11,6 +11,16 @@ namespace MosaicScreensaver
         private RadioButton rdoMusicOnly;
         private RadioButton rdoMovieOnly;
         private RadioButton rdoMixed;
+        private RadioButton rdoBooksOnly;
+        private RadioButton rdoAllMixed;
+
+        private GroupBox grpAnimation;
+        private RadioButton rdoFlip;
+        private RadioButton rdoFlow;
+
+        private GroupBox grpBooks;
+        private RadioButton rdoChineseBooks;
+        private RadioButton rdoAllBooks;
 
         private Label lblMusicTitle;
         private CheckedListBox lstMusicGenres;
@@ -35,7 +45,7 @@ namespace MosaicScreensaver
         private void InitializeComponent()
         {
             this.Text = "Mosaic Screensaver Settings";
-            this.ClientSize = new Size(640, 640);
+            this.ClientSize = new Size(880, 680);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
 
             this.MaximizeBox = false;
@@ -47,110 +57,69 @@ namespace MosaicScreensaver
             grpDisplayMode = new GroupBox();
             grpDisplayMode.Text = "Display Content";
             grpDisplayMode.Location = new Point(15, 15);
-            grpDisplayMode.Size = new Size(280, 140);
+            grpDisplayMode.Size = new Size(280, 200);
             grpDisplayMode.Font = new Font("Segoe UI", 9, FontStyle.Bold);
 
-            rdoMusicOnly = new RadioButton();
-            rdoMusicOnly.Text = "Music Albums only (1:1 Grid)";
-            rdoMusicOnly.Location = new Point(15, 25);
-            rdoMusicOnly.Size = new Size(250, 30);
-            rdoMusicOnly.Font = new Font("Segoe UI", 9, FontStyle.Regular);
-            rdoMusicOnly.Checked = true;
+            rdoMusicOnly = new RadioButton { Text = "Music Albums only", Location = new Point(15, 25), Size = new Size(250, 30), Font = new Font("Segoe UI", 9) };
+            rdoMovieOnly = new RadioButton { Text = "Movie Posters only", Location = new Point(15, 60), Size = new Size(250, 30), Font = new Font("Segoe UI", 9) };
+            rdoBooksOnly = new RadioButton { Text = "Book Covers only", Location = new Point(15, 95), Size = new Size(250, 30), Font = new Font("Segoe UI", 9) };
+            rdoMixed = new RadioButton { Text = "Mixed (Music & Movie)", Location = new Point(15, 130), Size = new Size(250, 30), Font = new Font("Segoe UI", 9) };
+            rdoAllMixed = new RadioButton { Text = "All Mixed (Music, Movie, Books)", Location = new Point(15, 165), Size = new Size(250, 30), Font = new Font("Segoe UI", 9) };
+            
             rdoMusicOnly.CheckedChanged += (s, e) => UpdateControlStates();
-
-            rdoMovieOnly = new RadioButton();
-            rdoMovieOnly.Text = "Movie Posters only (2:3 Grid)";
-            rdoMovieOnly.Location = new Point(15, 60);
-            rdoMovieOnly.Size = new Size(250, 30);
-            rdoMovieOnly.Font = new Font("Segoe UI", 9, FontStyle.Regular);
             rdoMovieOnly.CheckedChanged += (s, e) => UpdateControlStates();
-
-            rdoMixed = new RadioButton();
-            rdoMixed.Text = "Mixed (Alternating Columns)";
-            rdoMixed.Location = new Point(15, 95);
-            rdoMixed.Size = new Size(250, 30);
-            rdoMixed.Font = new Font("Segoe UI", 9, FontStyle.Regular);
+            rdoBooksOnly.CheckedChanged += (s, e) => UpdateControlStates();
             rdoMixed.CheckedChanged += (s, e) => UpdateControlStates();
+            rdoAllMixed.CheckedChanged += (s, e) => UpdateControlStates();
 
-            grpDisplayMode.Controls.Add(rdoMusicOnly);
-            grpDisplayMode.Controls.Add(rdoMovieOnly);
-            grpDisplayMode.Controls.Add(rdoMixed);
+            grpDisplayMode.Controls.AddRange(new Control[] { rdoMusicOnly, rdoMovieOnly, rdoBooksOnly, rdoMixed, rdoAllMixed });
+
+            // Animation Effect
+            grpAnimation = new GroupBox();
+            grpAnimation.Text = "Animation Effect";
+            grpAnimation.Location = new Point(310, 15);
+            grpAnimation.Size = new Size(280, 100);
+            grpAnimation.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+
+            rdoFlip = new RadioButton { Text = "3D Tile Flip", Location = new Point(15, 25), Size = new Size(250, 30), Font = new Font("Segoe UI", 9) };
+            rdoFlow = new RadioButton { Text = "Flowing (Left to Right)", Location = new Point(15, 60), Size = new Size(250, 30), Font = new Font("Segoe UI", 9) };
+            grpAnimation.Controls.AddRange(new Control[] { rdoFlip, rdoFlow });
+
+            // Books Settings
+            grpBooks = new GroupBox();
+            grpBooks.Text = "Books Options";
+            grpBooks.Location = new Point(605, 15);
+            grpBooks.Size = new Size(260, 100);
+            grpBooks.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+
+            rdoChineseBooks = new RadioButton { Text = "Chinese Books Only", Location = new Point(15, 25), Size = new Size(240, 30), Font = new Font("Segoe UI", 9) };
+            rdoAllBooks = new RadioButton { Text = "Chinese & Western Books", Location = new Point(15, 60), Size = new Size(240, 30), Font = new Font("Segoe UI", 9) };
+            grpBooks.Controls.AddRange(new Control[] { rdoChineseBooks, rdoAllBooks });
 
             // Music Genres List
-            lblMusicTitle = new Label();
-            lblMusicTitle.Text = "Music Genres";
-            lblMusicTitle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            lblMusicTitle.Location = new Point(15, 175);
-            lblMusicTitle.AutoSize = true;
-
-            lstMusicGenres = new CheckedListBox();
-            lstMusicGenres.Location = new Point(15, 200);
-            lstMusicGenres.Size = new Size(280, 270);
-            lstMusicGenres.CheckOnClick = true;
-            lstMusicGenres.Font = new Font("Segoe UI", 9);
-
-            foreach (var genre in SettingsManager.AllGenres)
-            {
-                lstMusicGenres.Items.Add(genre);
-            }
+            lblMusicTitle = new Label { Text = "Music Genres", Font = new Font("Segoe UI", 10, FontStyle.Bold), Location = new Point(15, 230), AutoSize = true };
+            lstMusicGenres = new CheckedListBox { Location = new Point(15, 255), Size = new Size(280, 270), CheckOnClick = true, Font = new Font("Segoe UI", 9) };
+            foreach (var genre in SettingsManager.AllGenres) lstMusicGenres.Items.Add(genre);
 
             // Movie Genres List
-            lblMovieTitle = new Label();
-            lblMovieTitle.Text = "Movie Genres";
-            lblMovieTitle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            lblMovieTitle.Location = new Point(325, 15);
-            lblMovieTitle.AutoSize = true;
-
-            lstMovieGenres = new CheckedListBox();
-            lstMovieGenres.Location = new Point(325, 40);
-            lstMovieGenres.Size = new Size(280, 430);
-            lstMovieGenres.CheckOnClick = true;
-            lstMovieGenres.Font = new Font("Segoe UI", 9);
-
-            foreach (var genre in SettingsManager.AllMovieGenres)
-            {
-                lstMovieGenres.Items.Add(genre);
-            }
+            lblMovieTitle = new Label { Text = "Movie Genres", Font = new Font("Segoe UI", 10, FontStyle.Bold), Location = new Point(310, 130), AutoSize = true };
+            lstMovieGenres = new CheckedListBox { Location = new Point(310, 155), Size = new Size(280, 370), CheckOnClick = true, Font = new Font("Segoe UI", 9) };
+            foreach (var genre in SettingsManager.AllMovieGenres) lstMovieGenres.Items.Add(genre);
 
             // Speed Control
-            lblSpeed = new Label();
-            lblSpeed.Text = "Cover / Poster Flip Frequency";
-            lblSpeed.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            lblSpeed.Location = new Point(15, 490);
-            lblSpeed.AutoSize = true;
-
-            trackBarSpeed = new TrackBar();
-            trackBarSpeed.Location = new Point(15, 515);
-            trackBarSpeed.Size = new Size(590, 45);
-            trackBarSpeed.Minimum = 1;
-            trackBarSpeed.Maximum = 5;
-            trackBarSpeed.Value = 3;
-            trackBarSpeed.TickStyle = TickStyle.BottomRight;
-            trackBarSpeed.TickFrequency = 1;
-
-            lblSpeedLabels = new Label();
-            lblSpeedLabels.Text = "1 (Slowest)                         2                         3 (Normal)                         4                         5 (Fastest)";
-            lblSpeedLabels.Font = new Font("Segoe UI", 8);
-            lblSpeedLabels.Location = new Point(20, 560);
-            lblSpeedLabels.Size = new Size(580, 20);
-            lblSpeedLabels.ForeColor = Color.Gray;
+            lblSpeed = new Label { Text = "Animation Speed", Font = new Font("Segoe UI", 10, FontStyle.Bold), Location = new Point(15, 540), AutoSize = true };
+            trackBarSpeed = new TrackBar { Location = new Point(15, 565), Size = new Size(575, 45), Minimum = 1, Maximum = 5, Value = 3, TickStyle = TickStyle.BottomRight, TickFrequency = 1 };
+            lblSpeedLabels = new Label { Text = "1 (Slowest)                         2                         3 (Normal)                         4                         5 (Fastest)", Font = new Font("Segoe UI", 8), Location = new Point(20, 610), Size = new Size(580, 20), ForeColor = Color.Gray };
 
             // Buttons
-            btnSave = new Button();
-            btnSave.Text = "Save";
-            btnSave.Location = new Point(440, 595);
-            btnSave.Size = new Size(80, 30);
-            btnSave.Font = new Font("Segoe UI", 9);
+            btnSave = new Button { Text = "Save", Location = new Point(680, 630), Size = new Size(90, 35), Font = new Font("Segoe UI", 9) };
             btnSave.Click += BtnSave_Click;
-
-            btnCancel = new Button();
-            btnCancel.Text = "Cancel";
-            btnCancel.Location = new Point(530, 595);
-            btnCancel.Size = new Size(80, 30);
-            btnCancel.Font = new Font("Segoe UI", 9);
+            btnCancel = new Button { Text = "Cancel", Location = new Point(775, 630), Size = new Size(90, 35), Font = new Font("Segoe UI", 9) };
             btnCancel.Click += BtnCancel_Click;
 
             this.Controls.Add(grpDisplayMode);
+            this.Controls.Add(grpAnimation);
+            this.Controls.Add(grpBooks);
             this.Controls.Add(lblMusicTitle);
             this.Controls.Add(lstMusicGenres);
             this.Controls.Add(lblMovieTitle);
@@ -167,105 +136,90 @@ namespace MosaicScreensaver
 
         private void UpdateControlStates()
         {
-            if (rdoMusicOnly.Checked)
-            {
-                lstMusicGenres.Enabled = true;
-                lstMovieGenres.Enabled = false;
-                lblMusicTitle.ForeColor = Color.Black;
-                lblMovieTitle.ForeColor = Color.Gray;
-            }
-            else if (rdoMovieOnly.Checked)
-            {
-                lstMusicGenres.Enabled = false;
-                lstMovieGenres.Enabled = true;
-                lblMusicTitle.ForeColor = Color.Gray;
-                lblMovieTitle.ForeColor = Color.Black;
-            }
-            else // Mixed
-            {
-                lstMusicGenres.Enabled = true;
-                lstMovieGenres.Enabled = true;
-                lblMusicTitle.ForeColor = Color.Black;
-                lblMovieTitle.ForeColor = Color.Black;
-            }
+            bool needsMusic = rdoMusicOnly.Checked || rdoMixed.Checked || rdoAllMixed.Checked;
+            bool needsMovie = rdoMovieOnly.Checked || rdoMixed.Checked || rdoAllMixed.Checked;
+            bool needsBooks = rdoBooksOnly.Checked || rdoAllMixed.Checked;
+
+            lstMusicGenres.Enabled = needsMusic;
+            lblMusicTitle.ForeColor = needsMusic ? Color.Black : Color.Gray;
+
+            lstMovieGenres.Enabled = needsMovie;
+            lblMovieTitle.ForeColor = needsMovie ? Color.Black : Color.Gray;
+
+            grpBooks.Enabled = needsBooks;
         }
 
         private void LoadSettings()
         {
-            // Load display mode
             int mode = SettingsManager.LoadDisplayMode();
             if (mode == 0) rdoMusicOnly.Checked = true;
             else if (mode == 1) rdoMovieOnly.Checked = true;
-            else rdoMixed.Checked = true;
+            else if (mode == 2) rdoMixed.Checked = true;
+            else if (mode == 3) rdoBooksOnly.Checked = true;
+            else rdoAllMixed.Checked = true;
 
-            // Load music genres
+            int animType = SettingsManager.LoadAnimationType();
+            if (animType == 1) rdoFlow.Checked = true; else rdoFlip.Checked = true;
+
+            int bookLang = SettingsManager.LoadBookLanguage();
+            if (bookLang == 1) rdoAllBooks.Checked = true; else rdoChineseBooks.Checked = true;
+
             List<string> savedGenres = SettingsManager.LoadGenres();
             for (int i = 0; i < lstMusicGenres.Items.Count; i++)
             {
-                string genre = lstMusicGenres.Items[i].ToString();
-                if (savedGenres.Contains(genre))
-                {
+                if (savedGenres.Contains(lstMusicGenres.Items[i].ToString()))
                     lstMusicGenres.SetItemChecked(i, true);
-                }
             }
 
-            // Load movie genres
             List<string> savedMovieGenres = SettingsManager.LoadMovieGenres();
             for (int i = 0; i < lstMovieGenres.Items.Count; i++)
             {
-                string genre = lstMovieGenres.Items[i].ToString();
-                if (savedMovieGenres.Contains(genre))
-                {
+                if (savedMovieGenres.Contains(lstMovieGenres.Items[i].ToString()))
                     lstMovieGenres.SetItemChecked(i, true);
-                }
             }
 
-            // Load flip speed
-            int speed = SettingsManager.LoadFlipSpeed();
-            trackBarSpeed.Value = speed;
+            trackBarSpeed.Value = SettingsManager.LoadFlipSpeed();
         }
 
         private void BtnSave_Click(object sender, EventArgs e)
         {
             List<string> selectedGenres = new List<string>();
-            foreach (var item in lstMusicGenres.CheckedItems)
-            {
-                selectedGenres.Add(item.ToString());
-            }
+            foreach (var item in lstMusicGenres.CheckedItems) selectedGenres.Add(item.ToString());
 
             List<string> selectedMovieGenres = new List<string>();
-            foreach (var item in lstMovieGenres.CheckedItems)
-            {
-                selectedMovieGenres.Add(item.ToString());
-            }
+            foreach (var item in lstMovieGenres.CheckedItems) selectedMovieGenres.Add(item.ToString());
 
-            // Validation
-            if (rdoMusicOnly.Checked && selectedGenres.Count == 0)
+            bool needsMusic = rdoMusicOnly.Checked || rdoMixed.Checked || rdoAllMixed.Checked;
+            bool needsMovie = rdoMovieOnly.Checked || rdoMixed.Checked || rdoAllMixed.Checked;
+
+            if (needsMusic && selectedGenres.Count == 0)
             {
                 MessageBox.Show("Please select at least one music genre.", "Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (rdoMovieOnly.Checked && selectedMovieGenres.Count == 0)
+            if (needsMovie && selectedMovieGenres.Count == 0)
             {
                 MessageBox.Show("Please select at least one movie genre.", "Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            if (rdoMixed.Checked && (selectedGenres.Count == 0 || selectedMovieGenres.Count == 0))
-            {
-                MessageBox.Show("Please select at least one music genre and one movie genre for Mixed mode.", "Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
 
-            // Save display mode
-            int mode = 0;
+            int mode = 2;
             if (rdoMusicOnly.Checked) mode = 0;
             else if (rdoMovieOnly.Checked) mode = 1;
-            else mode = 2;
+            else if (rdoMixed.Checked) mode = 2;
+            else if (rdoBooksOnly.Checked) mode = 3;
+            else if (rdoAllMixed.Checked) mode = 4;
+
+            int animType = rdoFlow.Checked ? 1 : 0;
+            int bookLang = rdoAllBooks.Checked ? 1 : 0;
 
             SettingsManager.SaveDisplayMode(mode);
+            SettingsManager.SaveAnimationType(animType);
+            SettingsManager.SaveBookLanguage(bookLang);
             SettingsManager.SaveGenres(selectedGenres);
             SettingsManager.SaveMovieGenres(selectedMovieGenres);
             SettingsManager.SaveFlipSpeed(trackBarSpeed.Value);
+            
             this.Close();
         }
 

@@ -10,6 +10,8 @@ namespace MosaicScreensaver
         private const string MovieGenresValueName = "SelectedMovieGenres";
         private const string FlipSpeedValueName = "FlipSpeed";
         private const string DisplayModeValueName = "DisplayMode";
+        private const string AnimationTypeValueName = "AnimationType";
+        private const string BookLanguageValueName = "BookLanguage";
 
         // A comprehensive list of music genres
         public static readonly string[] AllGenres = new string[]
@@ -136,7 +138,7 @@ namespace MosaicScreensaver
                         object value = key.GetValue(DisplayModeValueName);
                         if (value != null && int.TryParse(value.ToString(), out int mode))
                         {
-                            if (mode >= 0 && mode <= 2)
+                            if (mode >= 0 && mode <= 4)
                             {
                                 return mode;
                             }
@@ -211,6 +213,82 @@ namespace MosaicScreensaver
             {
                 // Ignore registry errors
             }
+        }
+
+        public static int LoadAnimationType()
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath))
+                {
+                    if (key != null)
+                    {
+                        object value = key.GetValue(AnimationTypeValueName);
+                        if (value != null && int.TryParse(value.ToString(), out int mode))
+                        {
+                            if (mode >= 0 && mode <= 1)
+                            {
+                                return mode;
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+            return 0; // Default to Flip (0). 1 = Flow
+        }
+
+        public static void SaveAnimationType(int mode)
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.CreateSubKey(RegistryKeyPath))
+                {
+                    if (key != null)
+                    {
+                        key.SetValue(AnimationTypeValueName, mode);
+                    }
+                }
+            }
+            catch { }
+        }
+
+        public static int LoadBookLanguage()
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryKeyPath))
+                {
+                    if (key != null)
+                    {
+                        object value = key.GetValue(BookLanguageValueName);
+                        if (value != null && int.TryParse(value.ToString(), out int mode))
+                        {
+                            if (mode >= 0 && mode <= 1)
+                            {
+                                return mode;
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+            return 0; // Default to Chinese Only (0). 1 = Chinese & Western
+        }
+
+        public static void SaveBookLanguage(int mode)
+        {
+            try
+            {
+                using (RegistryKey key = Registry.CurrentUser.CreateSubKey(RegistryKeyPath))
+                {
+                    if (key != null)
+                    {
+                        key.SetValue(BookLanguageValueName, mode);
+                    }
+                }
+            }
+            catch { }
         }
     }
 }

@@ -1,15 +1,13 @@
-const displayMode = typeof window.displayMode !== 'undefined' ? window.displayMode : 2; // 0 = Music, 1 = Movie, 2 = Mixed
+const displayMode = typeof window.displayMode !== 'undefined' ? window.displayMode : 2; // 0=Music, 1=Movie, 2=Mixed, 3=Books, 4=All Mixed
+const animationType = typeof window.animationType !== 'undefined' ? window.animationType : 0; // 0=Flip, 1=Flow
+const bookLanguage = typeof window.bookLanguage !== 'undefined' ? window.bookLanguage : 0; // 0=Chinese, 1=All
 
-const musicGenres = window.selectedMusicGenres && window.selectedMusicGenres.length > 0 
-    ? window.selectedMusicGenres 
-    : ['pop', 'rock', 'jazz'];
-
-const movieGenres = window.selectedMovieGenres && window.selectedMovieGenres.length > 0 
-    ? window.selectedMovieGenres 
-    : ['action', 'comedy', 'drama'];
+const musicGenres = window.selectedMusicGenres && window.selectedMusicGenres.length > 0 ? window.selectedMusicGenres : ['pop', 'rock', 'jazz'];
+const movieGenres = window.selectedMovieGenres && window.selectedMovieGenres.length > 0 ? window.selectedMovieGenres : ['action', 'comedy', 'drama'];
 
 let musicArtworks = [];
 let movieArtworks = [];
+let bookArtworks = [];
 let tiles = [];
 let cols = 0;
 let rows = 0;
@@ -23,17 +21,28 @@ async function fetchArtworks() {
         try {
             const cachedMusic = JSON.parse(localStorage.getItem('cachedMusicArtworks'));
             const cachedMovie = JSON.parse(localStorage.getItem('cachedMovieArtworks'));
-            if (cachedMusic && cachedMusic.length > 0 && cachedMovie && cachedMovie.length > 0) {
-                musicArtworks = cachedMusic;
-                movieArtworks = cachedMovie;
+            const cachedBook = JSON.parse(localStorage.getItem('cachedBookArtworks'));
+            
+            // Check if we have what we need based on displayMode
+            let cacheValid = true;
+            if ((displayMode === 0 || displayMode === 2 || displayMode === 4) && (!cachedMusic || cachedMusic.length === 0)) cacheValid = false;
+            if ((displayMode === 1 || displayMode === 2 || displayMode === 4) && (!cachedMovie || cachedMovie.length === 0)) cacheValid = false;
+            if ((displayMode === 3 || displayMode === 4) && (!cachedBook || cachedBook.length === 0)) cacheValid = false;
+            
+            if (cacheValid) {
+                musicArtworks = cachedMusic || [];
+                movieArtworks = cachedMovie || [];
+                bookArtworks = cachedBook || [];
                 console.log("Loaded artworks from cache.");
                 return;
             }
         } catch(e) {}
     }
 
-    // Fetch music sequentially to avoid iTunes rate limits (429 Too Many Requests)
-    if (displayMode === 0 || displayMode === 2) {
+    const promises = [];
+
+    // Fetch Music
+    if (displayMode === 0 || displayMode === 2 || displayMode === 4) {
         const selectedMusic = [...musicGenres].sort(() => 0.5 - Math.random()).slice(0, 3);
         for (const g of selectedMusic) {
             const url = `https://itunes.apple.com/search?term=${encodeURIComponent(g)}&entity=album&limit=200`;
@@ -43,33 +52,29 @@ async function fetchArtworks() {
                 if (data.results) {
                     data.results.forEach(item => {
                         if (item.artworkUrl100) {
-                            const highResUrl = item.artworkUrl100.replace('100x100bb', '600x600bb');
-                            musicArtworks.push(highResUrl);
+                            musicArtworks.push(item.artworkUrl100.replace('100x100bb', '600x600bb'));
                         }
                     });
                 }
-            } catch(e) {
-                console.error("Error fetching music:", e);
-            }
+            } catch(e) { console.error(e); }
         }
         musicArtworks = musicArtworks.sort(() => Math.random() - 0.5);
     }
 
-    // Fetch movie from a few random popular pages to get variety without rate limiting
-    if (displayMode === 1 || displayMode === 2) {
-        // Pick 3 random pages from the first 20 pages (approx 5000 popular shows)
+    // Fetch Movie
+    if (displayMode === 1 || displayMode === 2 || displayMode === 4) {
         const pages = [];
         while(pages.length < 3) {
             const p = Math.floor(Math.random() * 20);
             if(!pages.includes(p)) pages.push(p);
         }
         
-        const promises = pages.map(page => 
+        const moviePromises = pages.map(page => 
             fetch(`https://api.tvmaze.com/shows?page=${page}`)
                 .then(res => res.json())
                 .catch(() => [])
         );
-        const results = await Promise.all(promises);
+        const results = await Promise.all(moviePromises);
         results.forEach(data => {
             if (data && Array.isArray(data)) {
                 data.forEach(show => {
@@ -82,11 +87,7 @@ async function fetchArtworks() {
                         return show.genres && show.genres.some(sg => sg.toLowerCase() === g.toLowerCase());
                     });
                     if (matchesGenre && show.image) {
-                        if (show.image.original) {
-                            movieArtworks.push(show.image.original);
-                        } else if (show.image.medium) {
-                            movieArtworks.push(show.image.medium);
-                        }
+                        movieArtworks.push(show.image.original || show.image.medium);
                     }
                 });
             }
@@ -94,87 +95,91 @@ async function fetchArtworks() {
         movieArtworks = movieArtworks.sort(() => Math.random() - 0.5);
     }
 
-    // Fallback if empty
-    if (musicArtworks.length === 0) {
-        musicArtworks = ['https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/4a/0c/3e/4a0c3e60-fef0-be2a-5a50-6a1005a76e73/196626943960.jpg/600x600bb.jpg'];
+    // Fetch Books
+    if (displayMode === 3 || displayMode === 4) {
+        const pages = [];
+        while(pages.length < 3) {
+            const p = Math.floor(Math.random() * 20) + 1;
+            if(!pages.includes(p)) pages.push(p);
+        }
+        
+        const langParam = bookLanguage === 0 ? "&language=chi" : "";
+        const bookPromises = pages.map(page => 
+            fetch(`https://openlibrary.org/search.json?q=subject:fiction${langParam}&limit=100&page=${page}`)
+                .then(res => res.json())
+                .catch(() => ({}))
+        );
+        const results = await Promise.all(bookPromises);
+        results.forEach(data => {
+            if (data && data.docs) {
+                data.docs.forEach(doc => {
+                    if (doc.cover_i) {
+                        bookArtworks.push(`https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`);
+                    }
+                });
+            }
+        });
+        bookArtworks = bookArtworks.sort(() => Math.random() - 0.5);
     }
-    if (movieArtworks.length === 0) {
-        movieArtworks = ['https://static.tvmaze.com/uploads/images/original_untouched/425/1064746.jpg'];
-    }
+
+    // Fallbacks
+    if (musicArtworks.length === 0) musicArtworks = ['https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/4a/0c/3e/4a0c3e60-fef0-be2a-5a50-6a1005a76e73/196626943960.jpg/600x600bb.jpg'];
+    if (movieArtworks.length === 0) movieArtworks = ['https://static.tvmaze.com/uploads/images/original_untouched/425/1064746.jpg'];
+    if (bookArtworks.length === 0) bookArtworks = ['https://covers.openlibrary.org/b/id/8259441-L.jpg'];
 
     // Save to cache
     try {
         localStorage.setItem('cachedMusicArtworks', JSON.stringify(musicArtworks));
         localStorage.setItem('cachedMovieArtworks', JSON.stringify(movieArtworks));
+        localStorage.setItem('cachedBookArtworks', JSON.stringify(bookArtworks));
         localStorage.setItem('artworksCacheTime', now.toString());
     } catch(e) {}
 }
 
 function getRandomArtwork(type) {
-    const pool = type === 'music' ? musicArtworks : movieArtworks;
+    let pool = [];
+    if (type === 'music') pool = musicArtworks;
+    else if (type === 'movie') pool = movieArtworks;
+    else if (type === 'book') pool = bookArtworks;
+    else pool = [...musicArtworks, ...movieArtworks, ...bookArtworks];
+
     if (pool.length === 0) return '';
-
-    // Collect all currently used artworks on the grid for this type
-    const usedArtworks = new Set();
-    tiles.forEach(t => {
-        if (t.type === type) {
-            if (t.imgFront && t.imgFront.src) usedArtworks.add(t.imgFront.src);
-            if (t.imgBack && t.imgBack.src) usedArtworks.add(t.imgBack.src);
-        }
-    });
-
-    // Filter out used ones to prevent duplicates
-    let available = pool.filter(url => !usedArtworks.has(url));
-    
-    // If we run out of unique artworks, fallback to the entire pool
-    if (available.length === 0) {
-        available = pool;
-    }
-
-    return available[Math.floor(Math.random() * available.length)];
+    return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function initGrid() {
+function getGridTypes() {
+    if (displayMode === 0) return ['music'];
+    if (displayMode === 1) return ['movie'];
+    if (displayMode === 2) return ['music', 'movie'];
+    if (displayMode === 3) return ['book'];
+    return ['music', 'movie', 'book']; // 4
+}
+
+function initFlipGrid() {
     const container = document.getElementById('mosaic-container');
     container.innerHTML = '';
+    container.className = 'mosaic-container flip-mode';
     tiles = [];
 
     const width = window.innerWidth;
     const height = window.innerHeight;
-
-    // Determine vertical rows
-    // Target height around 200px per tile
     rows = Math.max(2, Math.round(height / 200));
-
-    // Determine column sizes and types
+    
     let colTypes = [];
-    if (displayMode === 0) {
-        // Music only (1:1 grid)
-        // Column width is roughly height / rows
-        const musicColWidth = height / rows;
-        cols = Math.max(1, Math.round(width / musicColWidth));
-        colTypes = Array(cols).fill('music');
-    } else if (displayMode === 1) {
-        // Movie only (2:3 grid)
-        // Column width is roughly (height / rows) * (2/3)
-        const movieColWidth = (height / rows) * (2 / 3);
-        cols = Math.max(1, Math.round(width / movieColWidth));
-        colTypes = Array(cols).fill('movie');
-    } else {
-        // Mixed (Alternating columns)
-        // Average column width: (MusicColWidth + MovieColWidth) / 2
-        const avgColWidth = ((height / rows) + (height / rows * 0.667)) / 2;
-        cols = Math.max(2, Math.round(width / avgColWidth));
-        
-        for (let i = 0; i < cols; i++) {
-            colTypes.push(i % 2 === 0 ? 'music' : 'movie');
-        }
+    const types = getGridTypes();
+    
+    // Average ratio
+    let totalRatio = 0;
+    types.forEach(t => { totalRatio += (t === 'music' ? 1 : 0.667); });
+    const avgColWidth = (height / rows) * (totalRatio / types.length);
+    
+    cols = Math.max(1, Math.round(width / avgColWidth));
+    for (let i = 0; i < cols; i++) {
+        colTypes.push(types[i % types.length]);
     }
 
     for (let c = 0; c < cols; c++) {
         const type = colTypes[c];
-        
-        // Create vertical column container
         const columnEl = document.createElement('div');
         columnEl.className = `mosaic-column ${type}`;
         container.appendChild(columnEl);
@@ -205,85 +210,103 @@ function initGrid() {
             tile.appendChild(inner);
             columnEl.appendChild(tile);
             
-            tiles.push({
-                el: tile,
-                imgFront: imgFront,
-                imgBack: imgBack,
-                isFlipped: false,
-                type: type
-            });
+            tiles.push({ el: tile, imgFront: imgFront, imgBack: imgBack, isFlipped: false, type: type });
         }
+    }
+}
+
+function initFlowGrid() {
+    const container = document.getElementById('mosaic-container');
+    container.innerHTML = '';
+    container.className = 'mosaic-container flow-mode';
+    
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    rows = Math.max(2, Math.round(height / 200));
+    const rowHeight = height / rows;
+    
+    const types = getGridTypes();
+    
+    // Create horizontal rows
+    for (let r = 0; r < rows; r++) {
+        const type = types[r % types.length];
+        const rowEl = document.createElement('div');
+        rowEl.className = `flow-row ${type}`;
+        rowEl.style.height = `${rowHeight}px`;
+        
+        // Speed depends on flipSpeed setting
+        const speedLevel = window.flipSpeed || 3;
+        // Animation duration: width * some factor. Lower speedLevel = higher duration = slower
+        const baseDuration = 60 - (speedLevel * 10); // e.g. 50s, 40s, 30s, 20s, 10s
+        const duration = baseDuration + Math.random() * 10;
+        
+        const track1 = document.createElement('div');
+        track1.className = 'flow-track';
+        track1.style.animationDuration = `${duration}s`;
+        
+        const track2 = document.createElement('div');
+        track2.className = 'flow-track';
+        track2.style.animationDuration = `${duration}s`;
+        
+        // Fill track with enough images
+        // Track needs to be at least screen width long
+        const itemWidth = type === 'music' ? rowHeight : rowHeight * 0.667;
+        const itemsNeeded = Math.ceil(width / itemWidth) + 1;
+        
+        for(let i=0; i < itemsNeeded; i++) {
+            const artworkUrl = getRandomArtwork(type);
+            
+            const img1 = document.createElement('img');
+            img1.src = artworkUrl;
+            track1.appendChild(img1);
+            
+            const img2 = document.createElement('img');
+            img2.src = artworkUrl;
+            track2.appendChild(img2);
+        }
+        
+        rowEl.appendChild(track1);
+        rowEl.appendChild(track2);
+        container.appendChild(rowEl);
     }
 }
 
 function flipRandomTile() {
     if (tiles.length === 0) return;
-    
-    // Pick a random tile that isn't currently flipping
     const availableTiles = tiles.filter(t => !t.el.classList.contains('flipping'));
     if (availableTiles.length === 0) return;
-    
     const tile = availableTiles[Math.floor(Math.random() * availableTiles.length)];
     
-    // Add flipping class for the popOut animation
     tile.el.classList.add('flipping');
-    
-    // Toggle flip state
     tile.isFlipped = !tile.isFlipped;
     
     if (tile.isFlipped) {
         tile.el.classList.add('is-flipped');
-        // Update the front image (which is now hidden) for the NEXT flip
         setTimeout(() => {
             tile.imgFront.classList.remove('loaded');
             tile.imgFront.src = getRandomArtwork(tile.type);
-        }, 600); // Update halfway through the flip
+        }, 600);
     } else {
         tile.el.classList.remove('is-flipped');
-        // Update the back image (which is now hidden) for the NEXT flip
         setTimeout(() => {
             tile.imgBack.classList.remove('loaded');
             tile.imgBack.src = getRandomArtwork(tile.type);
         }, 600);
     }
     
-    // Remove flipping class after animation ends
     setTimeout(() => {
         tile.el.classList.remove('flipping');
     }, 1200);
 }
 
-// Start multiple flip loops for a dynamic effect
 function startFlipping() {
-    // Number of simultaneous flips depends on screen size
     const flipCount = Math.max(1, Math.floor((cols * rows) / 20));
-    
-    // Map flipSpeed (1-5, default 3) to intervals
     const speedLevel = window.flipSpeed || 3;
-    let baseInterval, randomRange;
-    switch (speedLevel) {
-        case 1: // Slowest
-            baseInterval = 4500;
-            randomRange = 3000;
-            break;
-        case 2: // Slower
-            baseInterval = 3000;
-            randomRange = 2000;
-            break;
-        case 4: // Faster
-            baseInterval = 750;
-            randomRange = 500;
-            break;
-        case 5: // Fastest
-            baseInterval = 300;
-            randomRange = 200;
-            break;
-        case 3: // Normal
-        default:
-            baseInterval = 1500;
-            randomRange = 1000;
-            break;
-    }
+    let baseInterval = 1500, randomRange = 1000;
+    if (speedLevel === 1) { baseInterval = 4500; randomRange = 3000; }
+    else if (speedLevel === 2) { baseInterval = 3000; randomRange = 2000; }
+    else if (speedLevel === 4) { baseInterval = 750; randomRange = 500; }
+    else if (speedLevel === 5) { baseInterval = 300; randomRange = 200; }
     
     for (let i = 0; i < flipCount; i++) {
         setTimeout(() => {
@@ -292,20 +315,23 @@ function startFlipping() {
     }
 }
 
-// Handle window resize
 let resizeTimeout;
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
-        initGrid();
+        if (animationType === 1) initFlowGrid();
+        else initFlipGrid();
     }, 500);
 });
 
-// Initialization
 async function init() {
     await fetchArtworks();
-    initGrid();
-    startFlipping();
+    if (animationType === 1) {
+        initFlowGrid();
+    } else {
+        initFlipGrid();
+        startFlipping();
+    }
 }
 
 init();

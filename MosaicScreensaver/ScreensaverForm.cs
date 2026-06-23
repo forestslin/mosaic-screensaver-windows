@@ -97,6 +97,12 @@ namespace MosaicScreensaver
                 // Inject flip speed from Registry
                 int speed = SettingsManager.LoadFlipSpeed();
                 await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($"window.flipSpeed = {speed};");
+
+                int animType = SettingsManager.LoadAnimationType();
+                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($"window.animationType = {animType};");
+
+                int bookLang = SettingsManager.LoadBookLanguage();
+                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($"window.bookLanguage = {bookLang};");
                 
                 string appDir = AppDomain.CurrentDomain.BaseDirectory;
                 string htmlPath = Path.Combine(appDir, "web", "index.html");

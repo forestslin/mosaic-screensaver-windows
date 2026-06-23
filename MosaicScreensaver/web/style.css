@@ -98,3 +98,55 @@ body, html {
     50% { scale: 1.15; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
     100% { scale: 1; }
 }
+
+/* --- Flowing Animation Mode --- */
+
+.mosaic-container.flow-mode {
+    flex-direction: column;
+}
+
+.flow-row {
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.flow-track {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    flex-shrink: 0;
+    animation: flowMarquee linear infinite;
+}
+
+/* Stagger directions per row if you want, but user said left to right */
+/* To flow left to right, we actually translate from -100% to 0, or place them differently */
+/* User requested: "各种封面自左向右流动" (left to right) */
+/* So it should start at -100% and move to 0 */
+
+@keyframes flowMarqueeLeftToRight {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(0); }
+}
+
+.flow-track {
+    animation-name: flowMarqueeLeftToRight;
+}
+
+/* Aspect Ratios */
+.flow-row.music .flow-track img {
+    aspect-ratio: 1 / 1;
+}
+
+.flow-row.movie .flow-track img, .flow-row.book .flow-track img {
+    aspect-ratio: 2 / 3;
+}
+
+.flow-track img {
+    height: 100%;
+    object-fit: cover;
+    border: 1px solid rgba(0,0,0,0.5);
+    background-color: #222;
+}
