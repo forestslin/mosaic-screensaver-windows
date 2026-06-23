@@ -25,13 +25,13 @@ jobs:
       run: |
         cd MosaicScreensaver
         dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:IncludeAllContentForSelfExtract=true
-        Rename-Item -Path "bin\Release\net6.0-windows\win-x64\publish\MosaicScreensaver.exe" -NewName "MosaicScreensaver_Standalone.scr"
+        Rename-Item -Path "bin\Release\net6.0-windows\win-x64\publish\MosaicScreensaver.exe" -NewName "MosaicScreensaver_${{ github.ref_name }}.scr"
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          MosaicScreensaver/bin/Release/net6.0-windows/win-x64/publish/MosaicScreensaver_Standalone.scr
+          MosaicScreensaver/bin/Release/net6.0-windows/win-x64/publish/MosaicScreensaver_${{ github.ref_name }}.scr
         name: Release ${{ github.ref_name }}
         draft: false
         prerelease: false
