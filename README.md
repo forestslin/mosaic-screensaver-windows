@@ -1,26 +1,34 @@
-# 🖼️ Windows Universal Mosaic Screensaver (Album Art & Movie Posters)
+# 🖼️ Windows Universal Mosaic Screensaver (Album Art & Movie Posters & Book Covers)
 
 [![Demo Preview](preview.jpg)](https://github.com/forestslin/mosaic-screensaver-windows/raw/main/demo.mp4)
 
 **English Introduction**
-A stunning Windows screensaver inspired by macOS's classic "Artwork" (Album Art Mosaic) screensaver. It merges **Music Album Art** and **Movie Posters** into a single customizable screensaver:
+A stunning Windows screensaver inspired by macOS's classic "Artwork" (Album Art Mosaic) screensaver. It merges **Music Album Art**, **Movie Posters**, and **Book Covers** into a single customizable screensaver:
 1. **Music Album Art Mosaic**: Fetches hundreds of high-res album covers from iTunes (1:1 aspect ratio).
 2. **Movie Poster Wall**: Displays gorgeous, vertical HD movie and TV show posters from TVMaze (2:3 aspect ratio).
-3. **Mixed Mode**: Displays both side-by-side in alternating columns, perfectly filling the screen without black borders.
+3. **Book Cover Library**: Showcases high-quality book covers, with an exclusive mode just for Chinese literature via iTunes API.
+4. **Mixed Mode**: Displays everything side-by-side in alternating columns, perfectly filling the screen without black borders.
+5. **Animation Styles**: Choose between the classic 3D Tile Flip, or a smooth continuous Left-to-Right Flow.
 
-Features a dynamic, 3D flipping mosaic grid, multi-monitor support, zero dependencies (standalone executable), and a built-in settings UI to select your display mode and favorite music/movie genres.
+Features multi-monitor support, zero dependencies (standalone executable), and a built-in settings UI to select your display mode and favorite genres.
 
 ---
 
-这是一个惊艳的 Windows 屏幕保护程序，灵感来源于 macOS 经典的 "Artwork" (专辑封面马赛克) 屏保。现已将 **音乐唱片墙** 与 **电影海报墙** 完美合二为一！你可以在设置面板中自由选择展示纯唱片墙、纯电影海报墙、或者两者混搭，且完美适配任何屏幕比例，无任何黑边。
+这是一个惊艳的 Windows 屏幕保护程序，灵感来源于 macOS 经典的 "Artwork" (专辑封面马赛克) 屏保。现已将 **音乐唱片墙**、**电影海报墙** 与 **书籍封面墙** 完美合而为一！你可以在设置面板中自由选择展示纯唱片墙、纯电影海报墙、纯书籍墙，或者三者大混搭，并提供两种惊艳的视觉动效，且完美适配任何屏幕比例，无任何黑边。
 
 ## 🌟 核心特性
-- **支持三种展示模式**：
+- **支持五大展示模式**：
   - **仅音乐专辑 (1:1 比例)**：完美还原 macOS 唱片墙效果。
   - **仅电影海报 (2:3 比例)**：呈现大气的电影和剧集海报墙。
-  - **唱片与海报混搭**：采用精巧的交替列布局，方圆与长宽巧妙融于一屏，完美填满屏幕，且图像显示完整无裁剪或拉伸。
-- **丰富的流派标签**：内置设置面板，支持分别勾选 28 种音乐流派 (Pop, Rock, Jazz 等) 与 22 种电影类型 (Action, Sci-Fi, 华语电影等)。
-- **翻转频率可调**：可在设置中设定 1-5 档翻转速度，定制你的专属动效节奏。
+  - **仅书籍封面 (2:3 比例)**：展示经典名著与流行小说的书籍封面。
+  - **唱片与海报混搭**：采用精巧的交替列布局，方圆与长宽巧妙融于一屏。
+  - **海陆空全混搭**：音乐、电影、书籍封面三位一体交替展示！
+- **专属中文图书模式**：特别支持“仅中文图书”模式，从苹果商店获取超清的中文小说、武侠、科幻、历史等纯正中文封面。
+- **两种顶级动效**：
+  - **经典 3D 翻转**：复刻 macOS 的网格 3D 随机翻转效果。
+  - **自左向右流动**：全新加入的跑马灯流动特效，一张张封面平滑地自左向右无限滑过，极具沉浸感。
+- **丰富的流派标签**：内置设置面板，支持分别勾选数十种音乐与电影流派 (Pop, Rock, Action, Sci-Fi, 华语电影等)。
+- **动效频率可调**：可在设置中设定 1-5 档速度，定制你的专属动效节奏。
 - **多显示器支持**：自动在所有连接的显示器上全屏运行。
 - **单文件独立运行**：基于 .NET 6 和 WebView2 封装，无需安装多余依赖。
 
@@ -28,10 +36,10 @@ Features a dynamic, 3D flipping mosaic grid, multi-monitor support, zero depende
 
 ### 方法 1：下载现成的单文件版 (推荐)
 进入项目的 **[Release 页面](https://github.com/forestslin/mosaic-screensaver-windows/releases/latest)**，下载：
-- `MosaicScreensaver_Standalone.scr`
+- `MosaicScreensaver_Standalone.scr` （或最新的 `v5.0.x.zip` 包内的 `.scr` 文件）
 
 **使用方法**：
-1. **配置**：右键点击该 `.scr` 文件，选择 **配置 (Configure)**，选择展示模式并勾选喜欢的流派，以及设定翻转速度。
+1. **配置**：右键点击该 `.scr` 文件，选择 **配置 (Configure)**，选择展示模式并勾选喜欢的流派，设定动效风格和速度。
 2. **测试**：双击 `.scr` 文件即可直接全屏预览（动一下鼠标或按任意键即可退出）。
 3. **安装**：右键点击该 `.scr` 文件，选择 **安装 (Install)** 应用为默认系统屏保。
 
@@ -48,28 +56,26 @@ Features a dynamic, 3D flipping mosaic grid, multi-monitor support, zero depende
 
 ## 🆕 更新日志 (Changelog)
 
+### v5.0.x
+- **【全新内容】加入书籍封面**：新增书籍封面展示，带来浓浓的书卷气！包含全球小说，更专属定制了“仅中文图书”模式，直连苹果图书库，呈现绝佳的高清中文武侠、科幻（如《三体》）封面。
+- **【全新动效】平滑流动模式**：除经典的随机 3D 翻转外，新增了“一张张自左向右流动”的平滑跑马灯动效，满屏覆盖，极其惊艳。
+
 ### v4.0
 - **【重磅】合二为一的终极版本**：将“音乐唱片墙”和“电影海报墙”完美合并为一个通用屏保程序。
-- **自由选择展示模式**：在设置面板中，可选择显示“纯音乐唱片”、“纯电影海报”或“唱片与海报混搭”！
 - **智能混搭排版**：混搭模式下采用交替列布局，方正的唱片与竖版的电影海报巧妙融于一屏，填满全屏无黑边且无裁切拉伸。
 
-
 ### v3.2
-- **【新增】封面翻转频率调节**：在两款屏保的设置面板中新增了“封面翻转频率”调节滑块（1-5档，1为最慢，3为默认，5为最快），可随心定制翻转的节奏。
-- **【修复】界面文字修正**：修复了“电影海报墙”屏保设置界面中残留的“音乐/专辑”等文案错误，已全部修正为电影海报相关的描述。
+- **【新增】封面翻转频率调节**：新增了“封面翻转频率”调节滑块（1-5档），可随心定制翻转的节奏。
 
 ### v3.0
-- **【重磅】全新电影海报墙屏保发布！**：除音乐专辑外，现在推出了全新的电影海报专属屏保代码。
-- **超清 2:3 海报比例**：完美适配竖版电影海报比例，视觉震撼。
-- **28 种影视流派**：包含“动作”、“喜剧”、“科幻”，以及新增的“中国电影 (Chinese)”分类。
+- **【重磅】全新电影海报墙屏保发布！**：推出全新的电影海报专属屏保模式，完美适配竖版电影海报比例。
 
 ### v2.0
-- **全新设置面板**：在 Windows 屏幕保护程序设置中点击“设置”，现在可以自由勾选多达 28 种分类！
+- **全新设置面板**：可以自由勾选多达 28 种分类！
 - **修复黑边问题**：完美适配任何屏幕比例和多显示器，彻底消除所有黑边和封面裁切不完整问题。
-- **自动发布更新**：集成了 GitHub Actions，自动构建并发布最新的单文件版屏保。
 
 ## 🛠️ 技术栈
-- **前端**：Vanilla HTML5 + CSS3 (Grid & 3D Transforms) + JavaScript
+- **前端**：Vanilla HTML5 + CSS3 (Grid, Flexbox, Web Animations API, 3D Transforms) + JavaScript
 - **外壳**：C# (.NET 6 Windows Forms) + Microsoft.Web.WebView2
 
 ## 📝 证书
