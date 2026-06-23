@@ -80,6 +80,13 @@ namespace MosaicScreensaver
                 var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
                 await webView.EnsureCoreWebView2Async(env);
                 
+                // Inject Referer for Douban images to bypass hotlink protection
+                webView.CoreWebView2.AddWebResourceRequestedFilter("*doubanio.com*", CoreWebView2WebResourceContext.All);
+                webView.CoreWebView2.WebResourceRequested += (sender, args) =>
+                {
+                    args.Request.Headers.SetHeader("Referer", "https://book.douban.com/");
+                };
+
                 // Inject display mode from Registry
                 int mode = SettingsManager.LoadDisplayMode();
                 await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($"window.displayMode = {mode};");
