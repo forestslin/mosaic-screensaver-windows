@@ -35,8 +35,8 @@ Features multi-monitor support, zero dependencies (standalone executable), and a
 ## 🚀 安装指南
 
 ### 方法 1：下载现成的单文件版 (推荐)
-进入项目的 **[Release 页面](https://github.com/forestslin/mosaic-screensaver-windows/releases/latest)**，下载：
-- `MosaicScreensaver_Standalone.scr` （或最新的 `v5.0.x.zip` 包内的 `.scr` 文件）
+进入项目的 **[Release 页面](https://github.com/forestslin/mosaic-screensaver-windows/releases/latest)**，下载最新的独立执行文件：
+- `MosaicScreensaver_v5.0.6.scr` （或最新版本的 `.scr` 文件）
 
 **使用方法**：
 1. **配置**：右键点击该 `.scr` 文件，选择 **配置 (Configure)**，选择展示模式并勾选喜欢的流派，设定动效风格和速度。
@@ -56,9 +56,11 @@ Features multi-monitor support, zero dependencies (standalone executable), and a
 
 ## 🆕 更新日志 (Changelog)
 
-### v5.0.x
-- **【全新内容】加入书籍封面**：新增书籍封面展示，带来浓浓的书卷气！包含全球小说，更专属定制了“仅中文图书”模式，直连苹果图书库，呈现绝佳的高清中文武侠、科幻（如《三体》）封面。
+### v5.0.6
+- **【极致体验】内置250张豆瓣超清封面**：由于各大开放平台的防盗链和反爬虫限制，本项目直接内置了经过精挑细选的250张超清豆瓣评分最高中文书籍封面！全程本地加载，零延迟，无需网络，永不破图！
+- **【全新内容】加入书籍封面**：新增书籍封面展示，带来浓浓的书卷气！支持专属“仅中文图书”模式。
 - **【全新动效】平滑流动模式**：除经典的随机 3D 翻转外，新增了“一张张自左向右流动”的平滑跑马灯动效，满屏覆盖，极其惊艳。
+- **【化繁为简】完全单文件绿色版**：彻底抛弃压缩包，现在所有资源（包含250张内置图片）全部打包在单一的 `.scr` 文件中，体积约 170MB，下载后右键即可无缝安装。
 
 ### v4.0
 - **【重磅】合二为一的终极版本**：将“音乐唱片墙”和“电影海报墙”完美合并为一个通用屏保程序。
