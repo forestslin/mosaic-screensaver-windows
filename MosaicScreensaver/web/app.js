@@ -14,14 +14,14 @@ let rows = 0;
 
 async function fetchArtworks() {
     const now = Date.now();
-    const cacheTime = localStorage.getItem('artworksCacheTime');
+    const cacheTime = localStorage.getItem('artworksCacheTimeV2');
     
     // Use cache if it's less than 24 hours old
     if (cacheTime && (now - parseInt(cacheTime)) < 24 * 60 * 60 * 1000) {
         try {
-            const cachedMusic = JSON.parse(localStorage.getItem('cachedMusicArtworks'));
-            const cachedMovie = JSON.parse(localStorage.getItem('cachedMovieArtworks'));
-            const cachedBook = JSON.parse(localStorage.getItem('cachedBookArtworks'));
+            const cachedMusic = JSON.parse(localStorage.getItem('cachedMusicArtworksV2'));
+            const cachedMovie = JSON.parse(localStorage.getItem('cachedMovieArtworksV2'));
+            const cachedBook = JSON.parse(localStorage.getItem('cachedBookArtworksV2'));
             
             // Check if we have what we need based on displayMode
             let cacheValid = true;
@@ -97,29 +97,7 @@ async function fetchArtworks() {
 
     // Fetch Books
     if (displayMode === 3 || displayMode === 4) {
-        const pages = [];
-        while(pages.length < 3) {
-            const p = Math.floor(Math.random() * 20) + 1;
-            if(!pages.includes(p)) pages.push(p);
-        }
-        
-        const langParam = bookLanguage === 0 ? "&language=chi" : "";
-        const bookPromises = pages.map(page => 
-            fetch(`https://openlibrary.org/search.json?q=subject:fiction${langParam}&limit=100&page=${page}`)
-                .then(res => res.json())
-                .catch(() => ({}))
-        );
-        const results = await Promise.all(bookPromises);
-        results.forEach(data => {
-            if (data && data.docs) {
-                data.docs.forEach(doc => {
-                    if (doc.cover_i) {
-                        bookArtworks.push(`https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`);
-                    }
-                });
-            }
-        });
-        bookArtworks = bookArtworks.sort(() => Math.random() - 0.5);
+        await fetchBookArtworks();
     }
 
     // Fallbacks
@@ -129,11 +107,76 @@ async function fetchArtworks() {
 
     // Save to cache
     try {
-        localStorage.setItem('cachedMusicArtworks', JSON.stringify(musicArtworks));
-        localStorage.setItem('cachedMovieArtworks', JSON.stringify(movieArtworks));
-        localStorage.setItem('cachedBookArtworks', JSON.stringify(bookArtworks));
-        localStorage.setItem('artworksCacheTime', now.toString());
+        localStorage.setItem('cachedMusicArtworksV2', JSON.stringify(musicArtworks));
+        localStorage.setItem('cachedMovieArtworksV2', JSON.stringify(movieArtworks));
+        localStorage.setItem('cachedBookArtworksV2', JSON.stringify(bookArtworks));
+        localStorage.setItem('artworksCacheTimeV2', now.toString());
     } catch(e) {}
+}
+
+async function fetchBookArtworks() {
+    try {
+        const bookLanguage = typeof window.bookLanguage !== 'undefined' ? window.bookLanguage : 1; // 0=Chinese, 1=Mixed
+        
+        if (bookLanguage === 0) {
+            // Use iTunes API (Taiwan) for Chinese books to ensure Chinese covers
+            const terms = ['小說', '文學', '科幻', '歷史', '名著', '散文', '武俠', '言情', '推理', '奇幻'];
+            const promises = [];
+            for (let i = 0; i < 2; i++) { // Fetch 2 random categories
+                const term = terms[Math.floor(Math.random() * terms.length)];
+                promises.push(
+                    fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=ebook&country=tw&limit=100`)
+                        .then(res => res.json())
+                        .catch(() => ({}))
+                );
+            }
+            const results = await Promise.all(promises);
+            results.forEach(data => {
+                if (data && data.results) {
+                    data.results.forEach(book => {
+                        if (book.artworkUrl100) {
+                            bookArtworks.push(book.artworkUrl100.replace('100x100bb', '600x600bb'));
+                        }
+                    });
+                }
+            });
+        } else {
+            // Mixed/Western books using OpenLibrary
+            const pages = [];
+            for(let i=0; i<2; i++) {
+                pages.push(Math.floor(Math.random() * 20) + 1);
+            }
+            
+            const bookPromises = pages.map(page => 
+                fetch(`https://openlibrary.org/search.json?q=subject:fiction&limit=100&page=${page}`)
+                    .then(res => res.json())
+                    .catch(() => ({}))
+            );
+            
+            const results = await Promise.all(bookPromises);
+            results.forEach(data => {
+                if (data && data.docs) {
+                    data.docs.forEach(doc => {
+                        if (doc.cover_i) {
+                            bookArtworks.push(`https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg`);
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Fallback if no books loaded
+        if (bookArtworks.length === 0) {
+            bookArtworks = ['https://covers.openlibrary.org/b/id/8259441-L.jpg'];
+        } else {
+            bookArtworks = bookArtworks.sort(() => Math.random() - 0.5);
+            try {
+                localStorage.setItem('cachedBookArtworksV2', JSON.stringify(bookArtworks));
+            } catch(e) {}
+        }
+    } catch (err) {
+        console.error("Error fetching books", err);
+    }
 }
 
 function getRandomArtwork(type) {
