@@ -14,14 +14,14 @@ let rows = 0;
 
 async function fetchArtworks() {
     const now = Date.now();
-    const cacheTime = localStorage.getItem('artworksCacheTimeV2');
+    const cacheTime = localStorage.getItem('artworksCacheTimeV3');
     
     // Use cache if it's less than 24 hours old
     if (cacheTime && (now - parseInt(cacheTime)) < 24 * 60 * 60 * 1000) {
         try {
-            const cachedMusic = JSON.parse(localStorage.getItem('cachedMusicArtworksV2'));
-            const cachedMovie = JSON.parse(localStorage.getItem('cachedMovieArtworksV2'));
-            const cachedBook = JSON.parse(localStorage.getItem('cachedBookArtworksV2'));
+            const cachedMusic = JSON.parse(localStorage.getItem('cachedMusicArtworksV3'));
+            const cachedMovie = JSON.parse(localStorage.getItem('cachedMovieArtworksV3'));
+            const cachedBook = JSON.parse(localStorage.getItem('cachedBookArtworksV3'));
             
             // Check if we have what we need based on displayMode
             let cacheValid = true;
@@ -107,10 +107,10 @@ async function fetchArtworks() {
 
     // Save to cache
     try {
-        localStorage.setItem('cachedMusicArtworksV2', JSON.stringify(musicArtworks));
-        localStorage.setItem('cachedMovieArtworksV2', JSON.stringify(movieArtworks));
-        localStorage.setItem('cachedBookArtworksV2', JSON.stringify(bookArtworks));
-        localStorage.setItem('artworksCacheTimeV2', now.toString());
+        localStorage.setItem('cachedMusicArtworksV3', JSON.stringify(musicArtworks));
+        localStorage.setItem('cachedMovieArtworksV3', JSON.stringify(movieArtworks));
+        localStorage.setItem('cachedBookArtworksV3', JSON.stringify(bookArtworks));
+        localStorage.setItem('artworksCacheTimeV3', now.toString());
     } catch(e) {}
 }
 
@@ -119,10 +119,15 @@ async function fetchBookArtworks() {
         const bookLanguage = typeof window.bookLanguage !== 'undefined' ? window.bookLanguage : 1; // 0=Chinese, 1=Mixed
         
         if (bookLanguage === 0) {
-            // Use iTunes API (Taiwan) for Chinese books to ensure Chinese covers
-            const terms = ['小說', '文學', '科幻', '歷史', '名著', '散文', '武俠', '言情', '推理', '奇幻'];
+            // Use iTunes API (Taiwan) with curated authors and popular book titles to avoid generic public domain covers
+            const terms = [
+                '金庸', '古龍', '倪匡', '九把刀', '張愛玲', '三毛', '亦舒', '劉慈欣', 
+                '村上春樹', '東野圭吾', '阿嘉莎', '史蒂芬金', 
+                '哈利波特', '魔戒', '冰與火之歌', '三體', '盜墓筆記', '鬼吹燈', '慶餘年',
+                '白夜行', '百年孤寂', '人類大歷史', '繁花', '解憂雜貨店', '小王子', '追風筝的孩子'
+            ];
             const promises = [];
-            for (let i = 0; i < 2; i++) { // Fetch 2 random categories
+            for (let i = 0; i < 4; i++) { // Fetch 4 random categories to get a large pool
                 const term = terms[Math.floor(Math.random() * terms.length)];
                 promises.push(
                     fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=ebook&country=tw&limit=100`)
@@ -170,8 +175,10 @@ async function fetchBookArtworks() {
             bookArtworks = ['https://covers.openlibrary.org/b/id/8259441-L.jpg'];
         } else {
             bookArtworks = bookArtworks.sort(() => Math.random() - 0.5);
+            // Limit the total cached books to avoid exceeding localStorage quota
+            bookArtworks = bookArtworks.slice(0, 300);
             try {
-                localStorage.setItem('cachedBookArtworksV2', JSON.stringify(bookArtworks));
+                localStorage.setItem('cachedBookArtworksV3', JSON.stringify(bookArtworks));
             } catch(e) {}
         }
     } catch (err) {
