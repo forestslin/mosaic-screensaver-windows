@@ -31,7 +31,7 @@ body, html {
     flex: 3;
 }
 
-.mosaic-column.movie {
+.mosaic-column.movie, .mosaic-column.book {
     flex: 2;
 }
 
@@ -101,7 +101,7 @@ body, html {
 
 /* --- Flowing Animation Mode --- */
 
-.mosaic-container.flow-mode {
+#mosaic-container.flow-mode {
     flex-direction: column;
 }
 

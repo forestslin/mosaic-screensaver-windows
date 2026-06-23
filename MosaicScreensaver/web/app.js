@@ -227,48 +227,71 @@ function initFlowGrid() {
     
     const types = getGridTypes();
     
-    // Create horizontal rows
     for (let r = 0; r < rows; r++) {
         const type = types[r % types.length];
         const rowEl = document.createElement('div');
         rowEl.className = `flow-row ${type}`;
         rowEl.style.height = `${rowHeight}px`;
+        rowEl.style.position = 'relative';
         
-        // Speed depends on flipSpeed setting
         const speedLevel = window.flipSpeed || 3;
-        // Animation duration: width * some factor. Lower speedLevel = higher duration = slower
-        const baseDuration = 60 - (speedLevel * 10); // e.g. 50s, 40s, 30s, 20s, 10s
-        const duration = baseDuration + Math.random() * 10;
-        
-        const track1 = document.createElement('div');
-        track1.className = 'flow-track';
-        track1.style.animationDuration = `${duration}s`;
-        
-        const track2 = document.createElement('div');
-        track2.className = 'flow-track';
-        track2.style.animationDuration = `${duration}s`;
-        
-        // Fill track with enough images
-        // Track needs to be at least screen width long
+        // pixels per second = width / duration
+        const duration = 60 - (speedLevel * 10) + Math.random() * 10;
         const itemWidth = type === 'music' ? rowHeight : rowHeight * 0.667;
-        const itemsNeeded = Math.ceil(width / itemWidth) + 1;
         
-        for(let i=0; i < itemsNeeded; i++) {
-            const artworkUrl = getRandomArtwork(type);
-            
-            const img1 = document.createElement('img');
-            img1.src = artworkUrl;
-            track1.appendChild(img1);
-            
-            const img2 = document.createElement('img');
-            img2.src = artworkUrl;
-            track2.appendChild(img2);
+        const itemsNeeded = Math.ceil(width / itemWidth) + 2;
+        
+        // Initial fill
+        for (let i = 0; i < itemsNeeded; i++) {
+            spawnFlowTile(rowEl, type, itemWidth, width, duration, i * itemWidth - itemWidth);
         }
         
-        rowEl.appendChild(track1);
-        rowEl.appendChild(track2);
+        // Continuously spawn new tiles at the left edge (-itemWidth)
+        const spawnInterval = (itemWidth / width) * duration * 1000;
+        setInterval(() => {
+            spawnFlowTile(rowEl, type, itemWidth, width, duration, -itemWidth);
+        }, spawnInterval);
+        
         container.appendChild(rowEl);
     }
+}
+
+function spawnFlowTile(rowEl, type, itemWidth, screenWidth, duration, startX) {
+    const tile = document.createElement('div');
+    tile.className = 'flow-tile';
+    tile.style.width = `${itemWidth}px`;
+    tile.style.height = '100%';
+    tile.style.position = 'absolute';
+    tile.style.left = '0';
+    tile.style.top = '0';
+    
+    const img = document.createElement('img');
+    img.src = getRandomArtwork(type);
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    img.style.border = '1px solid rgba(0,0,0,0.5)';
+    img.style.backgroundColor = '#222';
+    
+    tile.appendChild(img);
+    rowEl.appendChild(tile);
+    
+    const speed = screenWidth / duration; 
+    const distanceToTravel = (screenWidth + itemWidth) - startX;
+    const travelTime = distanceToTravel / speed;
+    
+    const anim = tile.animate([
+        { transform: `translateX(${startX}px)` },
+        { transform: `translateX(${screenWidth + itemWidth}px)` }
+    ], {
+        duration: travelTime * 1000,
+        easing: 'linear',
+        fill: 'forwards'
+    });
+    
+    anim.onfinish = () => {
+        tile.remove();
+    };
 }
 
 function flipRandomTile() {
